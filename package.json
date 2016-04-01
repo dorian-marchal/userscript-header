@@ -1,6 +1,6 @@
 {
     "name": "userscript-header",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "author": "dorian-marchal",
     "description": "Generate userscript header from package.json",
     "repository": {

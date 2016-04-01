@@ -33,22 +33,43 @@ Example `package.json` :
 ```
 
 ```js
-var userscriptHeader = require('userscript-header');
+var UserscriptHeader = require('userscript-header');
 
-console.log(userscriptHeader.fromPackage('./package.json'));
+var userscriptHeader = UserscriptHeader.fromPackage('./package.json');
+
+userscriptHeader.getData();
+
+// Returns :
+
+// {
+//   'name': 'My userscript name',
+//   'author': 'Toast',
+//   'version': '0.1.0',
+//   'description': 'My userscript description',
+//   'namespace': 'http://www.spawnkill.fr',
+//   'match': '*://*.toast.tld/*',
+//   'grant': [
+//      'GM_addStyle',
+//      'GM_setClipboard',
+//   ],
+//   'run-at': 'document-start',
+// }
+
+
+console.log(header.toString());
 
 // Output :
 
 // ==UserScript==
+// @name My userscript name
 // @author Toast
+// @version 0.1.0
 // @description My userscript description
+// @namespace http://www.spawnkill.fr
+// @match *://*.toast.tld/*
 // @grant GM_addStyle
 // @grant GM_setClipboard
-// @match *://*.toast.tld/*
-// @name My userscript name
-// @namespace http://www.spawnkill.fr
 // @run-at document-start
-// @version 0.1.0
 // ==/UserScript==
 ```
 

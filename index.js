@@ -1,49 +1,71 @@
 var fs = require('fs');
 
 var getPackage = function(packagePath) {
+    /* eslint-disable no-sync, lines-around-comment */
     return JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-}
+    /* eslint-enable no-sync, lines-around-comment */
+};
 
-var getUserscriptFields = function(pkg) {
-    var fields = [];
+var UserscriptHeader = function() {};
 
-    pkg.userscript = pkg.userscript || {};
+UserscriptHeader.fromPackage = function(packagePath) {
+    var header = new UserscriptHeader();
+    header.setDataFromPackage(getPackage(packagePath));
+    return header;
+};
 
-    // Default to package values for some fields.
-    ['name', 'author', 'version', 'description'].forEach(function(field) {
-        var value = pkg.userscript[field] || pkg[field];
-        if (value) {
-            pkg.userscript[field] = value;
-        }
-    });
+UserscriptHeader.prototype = {
+    constructor: UserscriptHeader,
+    _data: {},
+    _sortedFields: ['name', 'author', 'version', 'description'],
 
-    Object.keys(pkg.userscript).sort().forEach(function(key) {
-        var values = pkg.userscript[key];
+    getData: function() {
+        return this._data;
+    },
 
-        if (!(values instanceof Array)) {
-            values = [values];
-        }
-        values.forEach(function(value) {
-            fields.push({
-                key: key,
-                value: value,
-            });
-        });
-    });
+    setData: function(data) {
+        this._data = data;
+    },
 
-    return fields;
-}
-
-module.exports = {
-    fromPackage: function(packagePath) {
-        var fields = getUserscriptFields(getPackage(packagePath));
-
+    toString: function() {
         var header = '// ==UserScript==\n';
-        fields.forEach(function(field) {
-            header += '// @' + field.key + ' ' + field.value + '\n';
-        });
+
+        Object.keys(this.getData()).forEach(function(key) {
+            var values = this.getData()[key];
+
+            if (!(values instanceof Array)) {
+                values = [values];
+            }
+            values.forEach(function(value) {
+                header += '// @' + key + ' ' + value + '\n';
+            });
+        }.bind(this));
+
         header += '// ==/UserScript==\n';
 
         return header;
     },
+
+    setDataFromPackage: function(pkg) {
+        var data = {};
+        pkg.userscript = pkg.userscript || {};
+
+        // Default to package values for some fields.
+        this._sortedFields.forEach(function(field) {
+            var value = pkg.userscript[field] || pkg[field];
+            if (value) {
+                data[field] = value;
+            }
+        });
+
+        Object.keys(pkg.userscript).forEach(function(key) {
+            if (this._sortedFields.indexOf(key) === -1) {
+                data[key] = pkg.userscript[key];
+            }
+        }.bind(this));
+
+        this.setData(data);
+    },
 };
+
+module.exports = UserscriptHeader;
